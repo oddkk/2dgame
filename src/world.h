@@ -35,6 +35,8 @@ struct world {
 	struct tile tilemap[WORLD_HEIGHT][WORLD_HEIGHT];
 	struct entity active_entities[MAX_ACTIVE_ENTITIES];
 	size_t num_active_entities;
+
+	struct chunk *chunks[CHUNK_LOAD_DIAMETER][CHUNK_LOAD_DIAMETER];
 };
 
 struct entity *allocate_entity(struct world *world);

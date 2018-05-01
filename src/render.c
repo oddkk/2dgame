@@ -170,27 +170,57 @@ void render_sprite(struct render_context *ctx, unsigned int sprite, int32_t x, i
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+static void render_chunk_tilemap(struct render_context *ctx,
+								 struct chunk *chunk,
+								 int64_t cam_left, int64_t cam_top) {
+	struct box cam_tiles;
+	struct box chunk_tiles;
+	struct box visible_tiles;
+
+	cam_tiles = box_from_width_height(
+		cam_left / TILE_SIZE - 1,
+		cam_top  / TILE_SIZE - 1,
+		SCREEN_TILES_WIDTH  + 2,
+		SCREEN_TILES_HEIGHT + 2
+	);
+
+	chunk_tiles = box_from_width_height(
+		chunk->x * CHUNK_WIDTH,
+		chunk->y * CHUNK_HEIGHT,
+		CHUNK_WIDTH,
+		CHUNK_HEIGHT
+	);
+
+	if (!box_intersect(&visible_tiles, cam_tiles, chunk_tiles)) {
+		// Nothing to render
+		return;
+	}
+
+	for (int64_t y = visible_tiles.top; y < visible_tiles.bottom; y++) {
+		for (int64_t x = visible_tiles.left; x < visible_tiles.right; x++) {
+			struct tile *tile;
+			int64_t screen_x, screen_y;
+			int64_t chunk_tile_x, chunk_tile_y;
+
+			chunk_tile_x = (x - chunk_tiles.left);
+			chunk_tile_y = (y - chunk_tiles.top);
+			screen_x = x * TILE_SIZE - cam_left;
+			screen_y = y * TILE_SIZE - cam_top;
+
+			tile = &chunk->tilemap[chunk_tile_y][chunk_tile_x];
+			render_sprite(ctx, tile->tex_id, screen_x, screen_y);
+		}
+	}
+}
+
 void render_tilemap(struct render_context *ctx, struct world *world) {
 	int64_t cam_left = world->camera_x - (SCREEN_TILES_WIDTH  * TILE_SIZE) / 2;
 	int64_t cam_top  = world->camera_y - (SCREEN_TILES_HEIGHT * TILE_SIZE) / 2;
 
-	int64_t leftmost_tile = cam_left / TILE_SIZE;
-	int64_t topmost_tile  = cam_top  / TILE_SIZE;
-
-	int64_t offset_x = -cam_left % TILE_SIZE;
-	int64_t offset_y = -cam_top  % TILE_SIZE;
-
-	for (int64_t y = 0; y < SCREEN_TILES_HEIGHT + 1; y += 1) {
-		for (int64_t x = 0; x < SCREEN_TILES_WIDTH + 1; x += 1) {
-			if (leftmost_tile + x >= 0 && leftmost_tile + x < WORLD_WIDTH &&
-			    topmost_tile  + y >= 0 && topmost_tile  + y < WORLD_HEIGHT) {
-				struct tile *tile;
-				int64_t screen_x, screen_y;
-
-				tile = &world->tilemap[topmost_tile + y][leftmost_tile + x];
-				screen_x = offset_x + x * TILE_SIZE;
-				screen_y = offset_y + y * TILE_SIZE;
-				render_sprite(ctx, tile->tex_id, screen_x, screen_y);
+	for (int y = 0; y < CHUNK_LOAD_DIAMETER; y++) {
+		for (int x = 0; x < CHUNK_LOAD_DIAMETER; x++) {
+			if (world->chunks[y][x]) {
+				render_chunk_tilemap(ctx, world->chunks[y][x], cam_left, cam_top);
 			}
 		}
 	}

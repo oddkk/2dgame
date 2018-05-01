@@ -190,8 +190,17 @@ int main(int argc, char **argv) {
 	(void)btn_west;
 
 	struct world world = {};
+	struct chunk test_chunk = {};
+	struct chunk test_chunk2 = {};
 	struct texture_map texture_map = {};
 	struct render_context render_ctx = {};
+
+	test_chunk.x = 0;
+	test_chunk.y = 0;
+	test_chunk2.x = 0;
+	test_chunk2.y = -1;
+	world.chunks[0][0] = &test_chunk;
+	world.chunks[1][0] = &test_chunk2;
 
 	render_ctx.texture_map = &texture_map;
 
@@ -204,13 +213,14 @@ int main(int argc, char **argv) {
 	ground = load_texture_from_file(&texture_map, STR("assets/tiles/grass.tile"));
 	none   = load_texture_from_file(&texture_map, STR("assets/tiles/ground.tile"));
 
-	for (int y = 0; y < WORLD_HEIGHT; y++) {
-		for (int x = 0; x < WORLD_WIDTH; x++) {
+	for (int y = 0; y < CHUNK_HEIGHT; y++) {
+		for (int x = 0; x < CHUNK_WIDTH; x++) {
 			if ((x + y) % 2 == 0) {
-				world.tilemap[y][x].tex_id = ground;
+				test_chunk.tilemap[y][x].tex_id = ground;
 			} else {
-				world.tilemap[y][x].tex_id = none;
+				test_chunk.tilemap[y][x].tex_id = none;
 			}
+			test_chunk2.tilemap[y][x].tex_id = none;
 		}
 	}
 
@@ -218,8 +228,8 @@ int main(int argc, char **argv) {
 
 	test_entity = allocate_entity(&world);
 
-	test_entity->x = 10;
-	test_entity->y = 10;
+	test_entity->x = 0;
+	test_entity->y = 0;
 
 	test_entity->width = 16;
 	test_entity->height = 16;

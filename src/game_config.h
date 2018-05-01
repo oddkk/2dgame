@@ -15,4 +15,6 @@
 
 #define MAX_TEXTURES 256
 
+#define CHUNK_LOAD_DIAMETER 3
+
 #endif
