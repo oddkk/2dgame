@@ -13,6 +13,7 @@ tile ~ tiles/wall_left
 tile @ tiles/wall_right
 tile . tiles/ground
 tile d tiles/door
+tile o tiles/door_open
 tile w tiles/window
 tile _
 
@@ -23,7 +24,7 @@ ___l^^^^^^^^r_xx
 xxxl^^^^^^^^r_xx
 _xxl^^^^^^^^r___
 ___1--------2x__
-___~|w|d||w|@x__
+___~|w|o||w|@x__
 ________________
 xx____xxxxxx____
 ________xxxx____

@@ -4,6 +4,7 @@
 #include "game_config.h"
 #include "opengl.h"
 #include "tile_loader.h"
+#include <stdio.h>
 
 void bitmap_to_rgb(uint16_t *bitmap, uint8_t *out, uint8_t r, uint8_t g, uint8_t b) {
 	// TODO: Make this general instead of relying on the tile size to
@@ -64,11 +65,31 @@ tex_id load_dither(struct texture_map *texmap, uint64_t *bitmap) {
 
 tex_id load_texture_from_file(struct texture_map *texmap,
 							  struct string filename) {
-	uint8_t buffer[TILE_SIZE*TILE_SIZE*3];
+	uint8_t buffer[TILE_SIZE*TILE_SIZE*3] = {};
 
 	if (!load_tile_data_from_file(buffer, TILE_SIZE, TILE_SIZE, filename)) {
 		return 0;
 	}
 
 	return load_texture_from_memory(texmap, buffer, TILE_SIZE, TILE_SIZE);
+}
+
+tex_id load_tile(struct texture_map *texmap, struct string assetname) {
+	char buffer[256];
+	struct string filename;
+	int ret;
+
+	filename.data = (uint8_t *)buffer;
+
+	ret = snprintf(buffer, sizeof(buffer),
+				   "assets/%.*s.tile", LIT(assetname));
+
+	if (ret < 0) {
+		perror("snprintf");
+		return false;
+	}
+
+	filename.length = ret;
+
+	return load_texture_from_file(texmap, filename);
 }

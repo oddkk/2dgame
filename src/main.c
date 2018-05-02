@@ -9,6 +9,7 @@
 #include "render.h"
 #include "texture_map.h"
 #include "editor.h"
+#include "chunk_loader.h"
 
 bool should_exit = false;
 
@@ -195,34 +196,21 @@ int main(int argc, char **argv) {
 	struct texture_map texture_map = {};
 	struct render_context render_ctx = {};
 
-	test_chunk.x = 0;
-	test_chunk.y = 0;
-	test_chunk2.x = 0;
-	test_chunk2.y = -1;
-	world.chunks[0][0] = &test_chunk;
-	world.chunks[1][0] = &test_chunk2;
+	world.chunks[1][0] = &test_chunk;
+	world.chunks[0][0] = &test_chunk2;
+
+	load_chunk(&test_chunk,  &texture_map, 0,-1, 0);
+	load_chunk(&test_chunk2, &texture_map, 0, 0, 0);
 
 	render_ctx.texture_map = &texture_map;
 
 	render_context_init(&render_ctx);
 	render_size_change(&render_ctx, window_width, window_height);
 
-	tex_id arrow, ground, none;
+	tex_id arrow;
 
 	arrow  = load_texture_from_file(&texture_map, STR("assets/tiles/arrow.tile"));
-	ground = load_texture_from_file(&texture_map, STR("assets/tiles/grass.tile"));
-	none   = load_texture_from_file(&texture_map, STR("assets/tiles/ground.tile"));
 
-	for (int y = 0; y < CHUNK_HEIGHT; y++) {
-		for (int x = 0; x < CHUNK_WIDTH; x++) {
-			if ((x + y) % 2 == 0) {
-				test_chunk.tilemap[y][x].tex_id = ground;
-			} else {
-				test_chunk.tilemap[y][x].tex_id = none;
-			}
-			test_chunk2.tilemap[y][x].tex_id = none;
-		}
-	}
 
 	struct entity *test_entity;
 

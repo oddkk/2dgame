@@ -60,7 +60,7 @@ bool load_tile_data_from_file(uint8_t *out,
 			ok &= config_eat_token_uint(&cfg, &w);
 			ok &= config_eat_token_uint(&cfg, &h);
 
-			if (w != 16 || h != 16) {
+			if (w != TILE_SIZE || h != TILE_SIZE) {
 				config_print_error(&cfg,
 								   "The tile size should be %ix%i px, but we got "
 								   "%zux%zu px.", TILE_SIZE, TILE_SIZE, w, h);
@@ -115,7 +115,7 @@ bool load_tile_data_from_file(uint8_t *out,
 					break;
 				}
 
-				col_len = MIN(TILE_SIZE, cfg.line.length - 1);
+				col_len = MIN(TILE_SIZE, cfg.line_data.length - 1);
 
 				if (col_len < TILE_SIZE) {
 					config_print_error(&cfg,
@@ -124,7 +124,7 @@ bool load_tile_data_from_file(uint8_t *out,
 				}
 
 				for (size_t col = 0; col < col_len; col += 1) {
-					int palette_entry = cfg.line.data[col];
+					int palette_entry = cfg.line_data.data[col];
 
 					if (!palette[palette_entry].set) {
 						config_print_error(&cfg, "Used unset palette entry %c.",
