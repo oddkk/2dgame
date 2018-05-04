@@ -140,10 +140,10 @@ static bool load_chunk_from_file(struct chunk *out,
 
 				col_len = MIN(CHUNK_WIDTH, cfg.line_data.length - 1);
 
-				if (col_len < TILE_SIZE) {
+				if (col_len < CHUNK_WIDTH) {
 					config_print_error(&cfg,
 									   "Expected %i columns of data, got %zu.",
-									   TILE_SIZE, col_len);
+									   CHUNK_WIDTH, col_len);
 				}
 
 				for (size_t col = 0; col < col_len; col += 1) {

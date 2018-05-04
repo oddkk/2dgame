@@ -2,6 +2,14 @@
 #include "config_parser.h"
 #include "game_config.h"
 #include "utils.h"
+#include <string.h>
+
+enum scale_mode {
+	SCALE_NONE,
+	SCALE_REPEAT,
+	SCALE_STRETCH,
+	SCALE_CENTER,
+};
 
 bool load_tile_data_from_file(uint8_t *out,
 							  unsigned int width, unsigned int height,
@@ -11,8 +19,10 @@ bool load_tile_data_from_file(uint8_t *out,
 		uint8_t r, g, b;
 		bool set;
 	} palette[255] = {};
+	uint64_t sprite_width, sprite_height;
 	bool version_specified = false;
 	bool size_specified = false;
+	enum scale_mode scale = SCALE_NONE;
 
 	assert(width == TILE_SIZE);
 	assert(height == TILE_SIZE);
@@ -50,22 +60,14 @@ bool load_tile_data_from_file(uint8_t *out,
 
 			version_specified = true;
 		} else if (string_equals(token, STR("size"))) {
-			uint64_t w, h;
 			bool ok = true;
 
 			if (size_specified) {
 				config_print_error(&cfg, "Size already specified.");
 				continue;
 			}
-			ok &= config_eat_token_uint(&cfg, &w);
-			ok &= config_eat_token_uint(&cfg, &h);
-
-			if (w != TILE_SIZE || h != TILE_SIZE) {
-				config_print_error(&cfg,
-								   "The tile size should be %ix%i px, but we got "
-								   "%zux%zu px.", TILE_SIZE, TILE_SIZE, w, h);
-				continue;
-			}
+			ok &= config_eat_token_uint(&cfg, &sprite_width);
+			ok &= config_eat_token_uint(&cfg, &sprite_height);
 
 			size_specified = true;
 		} else if (string_equals(token, STR("color"))) {
@@ -103,24 +105,52 @@ bool load_tile_data_from_file(uint8_t *out,
 			palette[ident.data[0]].g = g;
 			palette[ident.data[0]].b = b;
 			palette[ident.data[0]].set = true;
+		} else if (string_equals(token, STR("scale"))) {
+			struct string mode;
+
+			if (!config_eat_token(&cfg, &mode)) {
+				config_print_error(&cfg, "Expected a scale type after 'scale'.");
+				continue;
+			}
+
+			if (string_equals(mode, STR("repeat"))) {
+				scale = SCALE_REPEAT;
+			} else if (string_equals(mode, STR("stretch"))) {
+				scale = SCALE_STRETCH;
+			} else if (string_equals(mode, STR("center"))) {
+				scale = SCALE_CENTER;
+			} else {
+				config_print_error(&cfg, "Got unexpected scale type '%.*s'.", LIT(mode));
+			}
+
 		} else if (string_equals(token, STR("frame"))) {
 			// TODO: Implement frames
 		} else if (string_equals(token, STR("data"))) {
-			for (size_t row = 0; row < TILE_SIZE; row += 1) {
+			if (!size_specified) {
+				config_print_error(&cfg, "Size must be specified before sprite data is allowed.");
+				return false;
+			}
+
+			if (scale == SCALE_NONE &&
+				(width != sprite_width || height != sprite_height)) {
+				config_print_error(&cfg, "When no repeat mode is set, the sprite size should match the expected size of %ux%u.", width, height);
+			}
+
+			for (size_t row = 0; row < sprite_height; row += 1) {
 				size_t col_len;
 				if (!config_next_line(&cfg)) {
 					config_print_error(&cfg,
-									   "Expected %i rows of data, got %zu.",
-									   TILE_SIZE, row);
+									   "Expected %zu rows of data, got %zu.",
+									   sprite_height, row);
 					break;
 				}
 
-				col_len = MIN(TILE_SIZE, cfg.line_data.length - 1);
+				col_len = MIN(sprite_width, cfg.line_data.length - 1);
 
-				if (col_len < TILE_SIZE) {
+				if (col_len < sprite_width) {
 					config_print_error(&cfg,
-									   "Expected %i columns of data, got %zu.",
-									   TILE_SIZE, col_len);
+									   "Expected %zu columns of data, got %zu.",
+									   sprite_width, col_len);
 				}
 
 				for (size_t col = 0; col < col_len; col += 1) {
@@ -134,6 +164,24 @@ bool load_tile_data_from_file(uint8_t *out,
 					out[(col + row * TILE_SIZE) * 3 + 0] = palette[palette_entry].r;
 					out[(col + row * TILE_SIZE) * 3 + 1] = palette[palette_entry].g;
 					out[(col + row * TILE_SIZE) * 3 + 2] = palette[palette_entry].b;
+				}
+			}
+
+			if (scale == SCALE_REPEAT) {
+				for (size_t row = 0; row < sprite_height; row += 1) {
+					for (size_t col = sprite_width; col < TILE_SIZE; col += 1) {
+						size_t in_index  = 3 * (row * TILE_SIZE + (col % sprite_width));
+						size_t out_index = 3 * (row * TILE_SIZE + col);
+						out[out_index + 0] = out[in_index + 0];
+						out[out_index + 1] = out[in_index + 1];
+						out[out_index + 2] = out[in_index + 2];
+					}
+				}
+
+				for (size_t row = sprite_height; row < TILE_SIZE; row += 1) {
+					memcpy((void*)&out[TILE_SIZE * 3 * row],
+						(void*)&out[TILE_SIZE * 3 * (row % sprite_height)],
+						sizeof(uint8_t) * TILE_SIZE * 3);
 				}
 			}
 		}

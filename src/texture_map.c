@@ -49,10 +49,10 @@ tex_id load_bitmap(struct texture_map *texmap, uint16_t *bitmap, uint8_t r, uint
 }
 
 tex_id load_dither(struct texture_map *texmap, uint64_t *bitmap) {
-	uint8_t out[3*16*16] = {};
-	for (size_t i = 0; i < 16*16; ++i) {
-		uint64_t data = bitmap[i / 16];
-		uint8_t cell = (data >> ((16 - (i % 16)) * 4)) & 0xf;
+	uint8_t out[3*TILE_SIZE*TILE_SIZE] = {};
+	for (size_t i = 0; i < TILE_SIZE*TILE_SIZE; ++i) {
+		uint64_t data = bitmap[(i / TILE_SIZE) % 16];
+		uint8_t cell = (data >> ((16 - ((i % TILE_SIZE) % 16)) * 4)) & 0xf;
 		uint8_t value = ((uint32_t)cell * 255) / 0xf;
 
 		out[i*3+0] = value;
@@ -60,7 +60,7 @@ tex_id load_dither(struct texture_map *texmap, uint64_t *bitmap) {
 		out[i*3+2] = value;
 	}
 
-	return load_texture_from_memory(texmap, out, 16, 16);
+	return load_texture_from_memory(texmap, out, TILE_SIZE, TILE_SIZE);
 }
 
 tex_id load_texture_from_file(struct texture_map *texmap,
