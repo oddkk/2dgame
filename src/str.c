@@ -1,5 +1,7 @@
 #include "str.h"
 #include "utils.h"
+#include <stdlib.h>
+#include <string.h>
 
 static inline bool is_numeric(int i)
 {
@@ -102,4 +104,20 @@ bool string_to_float(struct string str, float *out) {
 	*out = result;
 
 	return true;
+}
+
+struct string duplicate_string(struct string str) {
+	struct string res;
+
+	res.length = str.length;
+	res.data = calloc(str.length, sizeof(uint8_t));
+	if (!res.data) {
+		res.length = 0;
+		print_error("string", "Failed to duplicate string because calloc failed.");
+		return res;
+	}
+
+	memcpy(res.data, str.data, res.length);
+
+	return res;
 }

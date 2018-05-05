@@ -17,4 +17,6 @@
 
 #define CHUNK_LOAD_DIAMETER 3
 
+#define SPRITE_LOADER_CACHE 64
+
 #endif

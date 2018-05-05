@@ -196,6 +196,8 @@ int main(int argc, char **argv) {
 	struct texture_map texture_map = {};
 	struct render_context render_ctx = {};
 
+	texture_map_init(&texture_map);
+
 	world.chunks[1][0] = &test_chunk;
 	world.chunks[0][0] = &test_chunk2;
 
@@ -209,8 +211,7 @@ int main(int argc, char **argv) {
 
 	tex_id arrow;
 
-	arrow  = load_texture_from_file(&texture_map, STR("assets/sprites/arrow.sprite"));
-
+	arrow  = load_sprite(&texture_map, STR("sprites/hero"));
 
 	struct entity *test_entity;
 

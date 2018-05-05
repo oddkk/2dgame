@@ -5,6 +5,7 @@
 #include "opengl.h"
 #include "sprite_loader.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 void bitmap_to_rgb(uint16_t *bitmap, uint8_t *out, uint8_t r, uint8_t g, uint8_t b) {
 	// TODO: Make this general instead of relying on the tile size to
@@ -23,7 +24,9 @@ void bitmap_to_rgb(uint16_t *bitmap, uint8_t *out, uint8_t r, uint8_t g, uint8_t
 	}
 }
 
-void texture_map_init(struct texture_map *texmap) {(void)texmap;}
+void texture_map_init(struct texture_map *texmap) {
+	texmap->sprite_loader_ctx = calloc(1, sizeof(struct sprite_loader_context));
+}
 
 tex_id load_texture_from_memory(struct texture_map *texmap, uint8_t *bitmap, int width, int height) {
 	tex_id texture_id;
@@ -63,33 +66,19 @@ tex_id load_dither(struct texture_map *texmap, uint64_t *bitmap) {
 	return load_texture_from_memory(texmap, out, TILE_SIZE, TILE_SIZE);
 }
 
-tex_id load_texture_from_file(struct texture_map *texmap,
-							  struct string filename) {
-	struct sprite sprite = {};
+tex_id load_sprite(struct texture_map *texmap, struct string assetname) {
+	struct cached_sprite *sprite;
+	tex_id result;
 
-	if (!load_sprite_data_from_file(&sprite, TILE_SIZE, TILE_SIZE, filename)) {
+	if (!load_sprite_data(
+			texmap->sprite_loader_ctx, &sprite,
+			TILE_SIZE, TILE_SIZE, assetname)) {
 		return 0;
 	}
 
-	return load_texture_from_memory(texmap, (uint8_t*)sprite.data, TILE_SIZE, TILE_SIZE);
-}
+	result = load_texture_from_memory(texmap, (uint8_t*)sprite->sprite.data, TILE_SIZE, TILE_SIZE);
 
-tex_id load_sprite(struct texture_map *texmap, struct string assetname) {
-	char buffer[256];
-	struct string filename;
-	int ret;
+	free_sprite(sprite);
 
-	filename.data = (uint8_t *)buffer;
-
-	ret = snprintf(buffer, sizeof(buffer),
-				   "assets/%.*s.sprite", LIT(assetname));
-
-	if (ret < 0) {
-		perror("snprintf");
-		return false;
-	}
-
-	filename.length = ret;
-
-	return load_texture_from_file(texmap, filename);
+	return result;
 }

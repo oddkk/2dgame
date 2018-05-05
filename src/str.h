@@ -13,6 +13,7 @@ struct string {
 
 bool string_equals(struct string, struct string);
 int read_character(struct string str, uint8_t **it);
+struct string duplicate_string(struct string str);
 
 bool string_to_uint64(struct string, uint64_t *out);
 bool string_to_float(struct string, float *out);
