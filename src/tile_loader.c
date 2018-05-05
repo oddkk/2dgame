@@ -73,7 +73,6 @@ bool load_tile_data_from_file(uint8_t *out,
 		} else if (string_equals(token, STR("color"))) {
 			struct string ident;
 			uint64_t r, g, b;
-			bool ok = true;
 
 			if (!config_eat_token(&cfg, &ident)) {
 				config_print_error(&cfg, "Expected character for palette entry.");
@@ -85,15 +84,43 @@ bool load_tile_data_from_file(uint8_t *out,
 				continue;
 			}
 
-			ok &= config_eat_token_uint(&cfg, &r);
-			ok &= config_eat_token_uint(&cfg, &g);
-			ok &= config_eat_token_uint(&cfg, &b);
+			if (config_count_remaining_tokens(&cfg) == 3) {
+				bool ok = true;
 
-			ok &= (r <= 255 && g <= 255 && b <= 255);
+				ok &= config_eat_token_uint(&cfg, &r);
+				ok &= config_eat_token_uint(&cfg, &g);
+				ok &= config_eat_token_uint(&cfg, &b);
 
-			if (!ok) {
-				config_print_error(&cfg, "Expected rgb values for color in the range 0-255.");
-				continue;
+				ok &= (r <= 255 && g <= 255 && b <= 255);
+
+				if (!ok) {
+					config_print_error(&cfg, "Expected rgb values for color in the range 0-255.");
+					continue;
+				}
+
+				// #ff00ff is used for transparancy, so remap this
+				// color to avoid unintentional transparancy.
+				if (r == 0xff && g == 0 && b == 0xff) {
+					r = 0xfe;
+					b = 0x00;
+					b = 0xfe;
+				}
+			} else {
+				struct string name;
+
+				if (!config_eat_token(&cfg, &name)) {
+					config_print_error(&cfg, "Expected r g b color value, or 'transparant'.", LIT(name));
+					continue;
+				}
+
+				if (string_equals(name, STR("transparant"))) {
+					r = 0xff;
+					g = 0x00;
+					b = 0xff;
+				} else {
+					config_print_error(&cfg, "Got unexpected color '%.*s'", LIT(name));
+					continue;
+				}
 			}
 
 			if (palette[ident.data[0]].set) {
