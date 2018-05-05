@@ -4,7 +4,11 @@
 #include "int.h"
 #include "str.h"
 
-bool load_sprite_data_from_file(uint8_t *out,
+struct sprite {
+	uint8_t data[TILE_SIZE][TILE_SIZE][3];
+};
+
+bool load_sprite_data_from_file(struct sprite *out,
 								unsigned int width, unsigned int height,
 								struct string filename);
 

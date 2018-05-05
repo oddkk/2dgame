@@ -65,13 +65,13 @@ tex_id load_dither(struct texture_map *texmap, uint64_t *bitmap) {
 
 tex_id load_texture_from_file(struct texture_map *texmap,
 							  struct string filename) {
-	uint8_t buffer[TILE_SIZE*TILE_SIZE*3] = {};
+	struct sprite sprite = {};
 
-	if (!load_sprite_data_from_file(buffer, TILE_SIZE, TILE_SIZE, filename)) {
+	if (!load_sprite_data_from_file(&sprite, TILE_SIZE, TILE_SIZE, filename)) {
 		return 0;
 	}
 
-	return load_texture_from_memory(texmap, buffer, TILE_SIZE, TILE_SIZE);
+	return load_texture_from_memory(texmap, (uint8_t*)sprite.data, TILE_SIZE, TILE_SIZE);
 }
 
 tex_id load_sprite(struct texture_map *texmap, struct string assetname) {

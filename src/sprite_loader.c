@@ -11,7 +11,7 @@ enum scale_mode {
 	SCALE_CENTER,
 };
 
-bool load_sprite_data_from_file(uint8_t *out,
+bool load_sprite_data_from_file(struct sprite *sprite,
 								unsigned int width, unsigned int height,
 								struct string filename) {
 	struct config_file cfg = {};
@@ -188,27 +188,25 @@ bool load_sprite_data_from_file(uint8_t *out,
 										   palette_entry);
 					}
 
-					out[(col + row * TILE_SIZE) * 3 + 0] = palette[palette_entry].r;
-					out[(col + row * TILE_SIZE) * 3 + 1] = palette[palette_entry].g;
-					out[(col + row * TILE_SIZE) * 3 + 2] = palette[palette_entry].b;
+					sprite->data[row][col][0] = palette[palette_entry].r;
+					sprite->data[row][col][1] = palette[palette_entry].g;
+					sprite->data[row][col][2] = palette[palette_entry].b;
 				}
 			}
 
 			if (scale == SCALE_REPEAT) {
 				for (size_t row = 0; row < sprite_height; row += 1) {
 					for (size_t col = sprite_width; col < TILE_SIZE; col += 1) {
-						size_t in_index  = 3 * (row * TILE_SIZE + (col % sprite_width));
-						size_t out_index = 3 * (row * TILE_SIZE + col);
-						out[out_index + 0] = out[in_index + 0];
-						out[out_index + 1] = out[in_index + 1];
-						out[out_index + 2] = out[in_index + 2];
+						sprite->data[row][col][0] = sprite->data[row][col % sprite_width][0];
+						sprite->data[row][col][1] = sprite->data[row][col % sprite_width][1];
+						sprite->data[row][col][2] = sprite->data[row][col % sprite_width][2];
 					}
 				}
 
 				for (size_t row = sprite_height; row < TILE_SIZE; row += 1) {
-					memcpy((void*)&out[TILE_SIZE * 3 * row],
-						(void*)&out[TILE_SIZE * 3 * (row % sprite_height)],
-						sizeof(uint8_t) * TILE_SIZE * 3);
+					memcpy((void*)&sprite->data[row],
+						(void*)&sprite->data[row % sprite_height],
+						sizeof(sprite->data[0]));
 				}
 			}
 		}
