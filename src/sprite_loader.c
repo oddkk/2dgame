@@ -1,4 +1,4 @@
-#include "tile_loader.h"
+#include "sprite_loader.h"
 #include "config_parser.h"
 #include "game_config.h"
 #include "utils.h"
@@ -11,9 +11,9 @@ enum scale_mode {
 	SCALE_CENTER,
 };
 
-bool load_tile_data_from_file(uint8_t *out,
-							  unsigned int width, unsigned int height,
-							  struct string filename) {
+bool load_sprite_data_from_file(uint8_t *out,
+								unsigned int width, unsigned int height,
+								struct string filename) {
 	struct config_file cfg = {};
 	struct {
 		uint8_t r, g, b;
@@ -33,7 +33,7 @@ bool load_tile_data_from_file(uint8_t *out,
 	palette[' '].set = true;
 
 	if (!cfg.fd) {
-		print_error("tile", "Could not open tile file %.*s.", LIT(filename));
+		print_error("sprite", "Could not open sprite file %.*s.", LIT(filename));
 		perror("fopen");
 		return false;
 	}

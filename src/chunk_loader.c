@@ -122,7 +122,7 @@ static bool load_chunk_from_file(struct chunk *out,
 				continue;
 			}
 
-			tile_palette[ident.data[0]].tex = load_tile(tex_map, name);
+			tile_palette[ident.data[0]].tex = load_sprite(tex_map, name);
 		} else if (string_equals(token, STR("layer"))) {
 			if (!config_eat_token_uint(&cfg, &layer)) {
 				config_print_error(&cfg, "Expected layer ID.");

@@ -209,7 +209,7 @@ int main(int argc, char **argv) {
 
 	tex_id arrow;
 
-	arrow  = load_texture_from_file(&texture_map, STR("assets/tiles/arrow.tile"));
+	arrow  = load_texture_from_file(&texture_map, STR("assets/sprites/arrow.sprite"));
 
 
 	struct entity *test_entity;

@@ -1,19 +1,19 @@
 version 0.1
 size 16 9
 
-tile x tiles/grass
-tile 1 tiles/roof_left_corner
-tile 2 tiles/roof_right_corner
-tile l tiles/roof_left
-tile r tiles/roof_right
-tile - tiles/roof_gutter
-tile ^ tiles/roof_top
-tile | tiles/wall
-tile ~ tiles/wall_left
-tile @ tiles/wall_right
-tile . tiles/ground
-tile d tiles/door
-tile w tiles/window
+tile x sprites/grass
+tile 1 sprites/roof_left_corner
+tile 2 sprites/roof_right_corner
+tile l sprites/roof_left
+tile r sprites/roof_right
+tile - sprites/roof_gutter
+tile ^ sprites/roof_top
+tile | sprites/wall
+tile ~ sprites/wall_left
+tile @ sprites/wall_right
+tile . sprites/ground
+tile d sprites/door
+tile w sprites/window
 tile _
 
 layer 0

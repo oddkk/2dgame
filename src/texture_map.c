@@ -3,7 +3,7 @@
 #include "utils.h"
 #include "game_config.h"
 #include "opengl.h"
-#include "tile_loader.h"
+#include "sprite_loader.h"
 #include <stdio.h>
 
 void bitmap_to_rgb(uint16_t *bitmap, uint8_t *out, uint8_t r, uint8_t g, uint8_t b) {
@@ -67,14 +67,14 @@ tex_id load_texture_from_file(struct texture_map *texmap,
 							  struct string filename) {
 	uint8_t buffer[TILE_SIZE*TILE_SIZE*3] = {};
 
-	if (!load_tile_data_from_file(buffer, TILE_SIZE, TILE_SIZE, filename)) {
+	if (!load_sprite_data_from_file(buffer, TILE_SIZE, TILE_SIZE, filename)) {
 		return 0;
 	}
 
 	return load_texture_from_memory(texmap, buffer, TILE_SIZE, TILE_SIZE);
 }
 
-tex_id load_tile(struct texture_map *texmap, struct string assetname) {
+tex_id load_sprite(struct texture_map *texmap, struct string assetname) {
 	char buffer[256];
 	struct string filename;
 	int ret;
@@ -82,7 +82,7 @@ tex_id load_tile(struct texture_map *texmap, struct string assetname) {
 	filename.data = (uint8_t *)buffer;
 
 	ret = snprintf(buffer, sizeof(buffer),
-				   "assets/%.*s.tile", LIT(assetname));
+				   "assets/%.*s.sprite", LIT(assetname));
 
 	if (ret < 0) {
 		perror("snprintf");
