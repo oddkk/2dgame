@@ -329,14 +329,28 @@ static bool load_sprite_data_from_file(struct sprite_loader_context *ctx,
 				for (size_t col = 0; col < col_len; col += 1) {
 					int palette_entry = cfg.line_data.data[col];
 
-					if (palette[palette_entry].type == PALETTE_UNSET) {
+					switch (palette[palette_entry].type) {
+					case PALETTE_COLOR:
+						sprite_out->data[row][col][0] = palette[palette_entry].color.r;
+						sprite_out->data[row][col][1] = palette[palette_entry].color.g;
+						sprite_out->data[row][col][2] = palette[palette_entry].color.b;
+						break;
+
+					case PALETTE_SAMPLER: {
+						struct sprite *sampler;
+						sampler = &palette[palette_entry].sprite->sprite;
+
+						sprite_out->data[row][col][0] = sampler->data[row][col][0];
+						sprite_out->data[row][col][1] = sampler->data[row][col][1];
+						sprite_out->data[row][col][2] = sampler->data[row][col][2];
+					} break;
+
+					default:
 						config_print_error(&cfg, "Used unset palette entry %c.",
 										   palette_entry);
+						break;
 					}
 
-					sprite_out->data[row][col][0] = palette[palette_entry].color.r;
-					sprite_out->data[row][col][1] = palette[palette_entry].color.g;
-					sprite_out->data[row][col][2] = palette[palette_entry].color.b;
 				}
 			}
 
