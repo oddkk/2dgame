@@ -70,27 +70,6 @@ static void _initialize_framebuffer_shader(struct render_context *ctx) {
 	glUseProgram(0);
 
 	ctx->screen_size_changed = true;
-
-	// Initialize dither
-	uint64_t dither_data[] = {
-		0x082a082a082a082a,
-		0xb4e6b4e6b4e6b4e6,
-		0x3c193c193c193c19,
-		0xf7d5f7d5f7d5f7d5,
-		0x082a082a082a082a,
-		0xb4e6b4e6b4e6b4e6,
-		0x3c193c193c193c19,
-		0xf7d5f7d5f7d5f7d5,
-		0x082a082a082a082a,
-		0xb4e6b4e6b4e6b4e6,
-		0x3c193c193c193c19,
-		0xf7d5f7d5f7d5f7d5,
-		0x082a082a082a082a,
-		0xb4e6b4e6b4e6b4e6,
-		0x3c193c193c193c19,
-		0xf7d5f7d5f7d5f7d5,
-	};
-	ctx->dither_texture = load_dither(NULL, dither_data);
 }
 
 static void _initialize_sprite_shader(struct render_context *ctx) {
