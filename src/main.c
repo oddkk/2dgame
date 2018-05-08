@@ -206,7 +206,7 @@ int main(int argc, char **argv) {
 
 	render_ctx.texture_map = &texture_map;
 
-	render_context_init(&render_ctx);
+	render_context_init(&render_ctx, &texture_map);
 	render_size_change(&render_ctx, window_width, window_height);
 
 	render_ctx.dither_texture = load_sprite(&texture_map, STR("sprites/dither"));

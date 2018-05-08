@@ -86,13 +86,18 @@ static void _initialize_sprite_shader(struct render_context *ctx) {
 		return;
 	}
 
+	ctx->sprite_shader.texmap_sprites = glGetUniformLocation(ctx->sprite_shader.id, "in_texmap_sprites");
 	ctx->sprite_shader.screen_size = glGetUniformLocation(ctx->sprite_shader.id, "in_screen_size");
+	ctx->sprite_shader.texture_id = glGetUniformLocation(ctx->sprite_shader.id, "in_texture_id");
 	ctx->sprite_shader.tile_size = glGetUniformLocation(ctx->sprite_shader.id, "in_tile_size");
 	ctx->sprite_shader.position = glGetUniformLocation(ctx->sprite_shader.id, "in_position");
 	ctx->sprite_shader.texture = glGetUniformLocation(ctx->sprite_shader.id, "in_texture");
 
 	glUseProgram(ctx->sprite_shader.id);
 	glUniform1i(ctx->sprite_shader.texture, 0);
+	glUniform2f(ctx->sprite_shader.texmap_sprites,
+				(float)TEXTURE_MAP_CAPACITY_SQUARE_ROOT,
+				(float)TEXTURE_MAP_CAPACITY_SQUARE_ROOT);
 	glUniform2f(ctx->sprite_shader.screen_size, (float)FB_WIDTH, (float)FB_HEIGHT);
 	glUniform2f(ctx->sprite_shader.tile_size, (float)TILE_SIZE, (float)TILE_SIZE);
 	glUseProgram(0);
@@ -117,7 +122,8 @@ static void _initialize_quad(struct render_context *ctx) {
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void render_context_init(struct render_context *ctx) {
+void render_context_init(struct render_context *ctx, struct texture_map *texmap) {
+	ctx->texture_map = texmap;
 	_initialize_framebuffer(ctx);
 	_initialize_quad(ctx);
 	_initialize_framebuffer_shader(ctx);
@@ -138,9 +144,10 @@ void render_sprite(struct render_context *ctx, unsigned int sprite, int32_t x, i
 	glUseProgram(ctx->sprite_shader.id);
 
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, sprite);
+	glBindTexture(GL_TEXTURE_2D, ctx->texture_map->map_id);
 
 	glUniform2f(ctx->sprite_shader.position, (float)x, (float)y);
+	glUniform1ui(ctx->sprite_shader.texture_id, sprite);
 
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
@@ -273,8 +280,8 @@ void render(struct render_context *ctx, struct world *world) {
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, ctx->fbo_texture);
 
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, ctx->dither_texture);
+	/* glActiveTexture(GL_TEXTURE2); */
+	/* glBindTexture(GL_TEXTURE_2D, ctx->dither_texture); */
 
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 

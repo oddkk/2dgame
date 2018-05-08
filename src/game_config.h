@@ -19,4 +19,9 @@
 
 #define SPRITE_LOADER_CACHE 64
 
+// The texture map capacity is expressed as the number of sprites
+// along a side of a square.
+#define TEXTURE_MAP_CAPACITY_SQUARE_ROOT 64
+#define TEXTURE_MAP_CAPACITY (TEXTURE_MAP_CAPACITY_SQUARE_ROOT*TEXTURE_MAP_CAPACITY_SQUARE_ROOT)
+
 #endif

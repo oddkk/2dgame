@@ -28,7 +28,7 @@ struct sprite_loader_context {
 	struct cached_sprite cache[SPRITE_LOADER_CACHE];
 	struct id_lookup_table loaded_sprites;
 
-	// A counter that is incremented every time a resource is acuired.
+	// A counter that is incremented every time a resource is aquired.
 	uint64_t time;
 };
 

@@ -23,10 +23,12 @@ struct render_context {
 
 	struct _sprite_shader {
 		unsigned int id;
+		unsigned int texture_id;
 		unsigned int texture;
 		unsigned int position;
 		unsigned int screen_size;
 		unsigned int tile_size;
+		unsigned int texmap_sprites;
 	} sprite_shader;
 
 	uint32_t screen_width;
@@ -36,7 +38,7 @@ struct render_context {
 	struct texture_map *texture_map;
 };
 
-void render_context_init(struct render_context *ctx);
+void render_context_init(struct render_context *ctx, struct texture_map *texmap);
 void render_size_change(struct render_context *ctx, uint32_t width, uint32_t height);
 
 struct world;
