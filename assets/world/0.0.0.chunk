@@ -7,6 +7,9 @@ tile 2 sprites/roof_right_corner
 tile l sprites/roof_left
 tile r sprites/roof_right
 tile - sprites/roof_gutter
+tile = sprites/roof_back
+tile 3 sprites/roof_back_left_corner
+tile 4 sprites/roof_back_right_corner
 tile ^ sprites/roof_top
 tile | sprites/wall
 tile ~ sprites/wall_left
@@ -19,7 +22,7 @@ tile _
 layer 0
 data
 _____xx_________
-___l^^^^^^^^r_xx
+___3========4_xx
 xxxl^^^^^^^^r_xx
 _xxl^^^^^^^^r___
 ___1--------2x__
