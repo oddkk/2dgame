@@ -10,6 +10,7 @@
 #include "texture_map.h"
 #include "editor.h"
 #include "chunk_loader.h"
+#include "chunk_cache.h"
 
 bool should_exit = false;
 
@@ -191,18 +192,13 @@ int main(int argc, char **argv) {
 	(void)btn_west;
 
 	struct world world = {};
-	struct chunk test_chunk = {};
-	struct chunk test_chunk2 = {};
+	struct chunk_cache chunk_cache = {};
 	struct texture_map texture_map = {};
 	struct render_context render_ctx = {};
 
 	texture_map_init(&texture_map);
 
-	world.chunks[1][0] = &test_chunk;
-	world.chunks[0][0] = &test_chunk2;
-
-	load_chunk(&test_chunk,  &texture_map, 0,-1, 0);
-	load_chunk(&test_chunk2, &texture_map, 0, 0, 0);
+	chunk_cache.texmap = &texture_map;
 
 	render_ctx.texture_map = &texture_map;
 
@@ -281,17 +277,34 @@ int main(int argc, char **argv) {
 		int diff_x = 0;
 		int diff_y = 0;
 
+		int speed = 1;
+
 		if (btn_north) diff_y -= 1;
 		if (btn_south) diff_y += 1;
 
 		if (btn_west)  diff_x -= 1;
 		if (btn_east)  diff_x += 1;
 
-		test_entity->x += diff_x;
-		test_entity->y += diff_y;
+		test_entity->x += diff_x * speed;
+		test_entity->y += diff_y * speed;
 
 		world.camera_x = test_entity->x + (test_entity->num_tiles_x * TILE_SIZE) / 2;
 		world.camera_y = test_entity->y + (test_entity->num_tiles_y * TILE_SIZE) / 2;
+
+		int64_t current_chunk_x, current_chunk_y;
+
+		current_chunk_x = world.camera_x / (CHUNK_WIDTH  * TILE_SIZE);
+		current_chunk_y = world.camera_y / (CHUNK_HEIGHT * TILE_SIZE);
+
+		// TODO: This dosn't have to happen each frame.
+		for (int y = 0; y < CHUNK_LOAD_DIAMETER; y++) {
+			for (int x = 0; x < CHUNK_LOAD_DIAMETER; x++) {
+				world.chunks[y][x] = get_chunk(&chunk_cache,
+											   current_chunk_x + x - CHUNK_LOAD_DIAMETER / 2,
+											   current_chunk_y + y - CHUNK_LOAD_DIAMETER / 2,
+											   0);
+			}
+		}
 
 		render(&render_ctx, &world);
 

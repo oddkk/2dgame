@@ -2,6 +2,7 @@
 #define GAME_WORLD_H
 
 #include "int.h"
+#include "str.h"
 #include "game_config.h"
 
 struct tile {
@@ -20,6 +21,7 @@ struct entity {
 };
 
 struct chunk {
+	struct string layer;
 	int32_t x, y, z;
 
 	struct tile tilemap[CHUNK_HEIGHT][CHUNK_WIDTH];

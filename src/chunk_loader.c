@@ -4,35 +4,11 @@
 #include "texture_map.h"
 #include "utils.h"
 #include <stdlib.h>
+#include <errno.h>
 
 static bool load_chunk_from_file(struct chunk *out,
 								 struct texture_map *tex_map,
 								 struct string filename);
-
-bool load_chunk(struct chunk *out, struct texture_map *tex_map,
-				int64_t x, int64_t y, int64_t z) {
-	struct string filename;
-	char buffer[256];
-	int ret;
-
-	filename.data = (uint8_t *)buffer;
-
-	ret = snprintf(buffer, sizeof(buffer),
-				   "assets/world/%li.%li.%li.chunk", x, y, z);
-
-	if (ret < 0) {
-		perror("snprintf");
-		return false;
-	}
-
-	filename.length = ret;
-
-	out->x = x;
-	out->y = y;
-	out->z = z;
-
-	return load_chunk_from_file(out, tex_map, filename);
-}
 
 bool load_chunk_layer(struct chunk *out, struct texture_map *tex_map,
 				int64_t x, int64_t y, int64_t z, struct string layer) {
@@ -42,8 +18,13 @@ bool load_chunk_layer(struct chunk *out, struct texture_map *tex_map,
 
 	filename.data = (uint8_t *)buffer;
 
-	ret = snprintf(buffer, sizeof(buffer),
-				   "assets/world/%li.%li.%li.%.*s.chunk", x, y, z, LIT(layer));
+	if (!string_equals(layer, STR("default"))) {
+		ret = snprintf(buffer, sizeof(buffer),
+					"assets/world/%li.%li.%li.%.*s.chunk", x, y, z, LIT(layer));
+	} else {
+		ret = snprintf(buffer, sizeof(buffer),
+					"assets/world/%li.%li.%li.chunk", x, y, z);
+	}
 
 	if (ret < 0) {
 		perror("snprintf");
@@ -52,11 +33,17 @@ bool load_chunk_layer(struct chunk *out, struct texture_map *tex_map,
 
 	filename.length = ret;
 
+	out->layer = layer;
 	out->x = x;
 	out->y = y;
 	out->z = z;
 
 	return load_chunk_from_file(out, tex_map, filename);
+}
+
+bool load_chunk(struct chunk *out, struct texture_map *tex_map,
+				int64_t x, int64_t y, int64_t z) {
+	return load_chunk_layer(out, tex_map, x, y, z, STR("default"));
 }
 
 static bool load_chunk_from_file(struct chunk *out,
@@ -77,6 +64,12 @@ static bool load_chunk_from_file(struct chunk *out,
 	tile_palette[' '].set = true;
 
 	if (!cfg.fd) {
+		if (errno == ENOENT) {
+			// Suppress error message if the file does not exist, as
+			// that is normal behaviour.
+			return false;
+		}
+
 		print_error("chunk", "Could not open chunk file %.*s.", LIT(filename));
 		perror("fopen");
 		return false;
