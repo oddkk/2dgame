@@ -2,6 +2,7 @@
 #include "config_parser.h"
 #include "game_config.h"
 #include "utils.h"
+#include "linmat.h"
 #include <string.h>
 #include <limits.h>
 
@@ -298,6 +299,110 @@ static bool load_sprite_data_from_file(struct sprite_loader_context *ctx,
 
 		} else if (string_equals(token, STR("frame"))) {
 			// TODO: Implement frames
+		} else if (string_equals(token, STR("load"))) {
+			struct string asset;
+			struct string arg;
+			int rotate = 0;
+			bool flip_horizontally = false;
+			bool flip_vertically = false;
+			struct cached_sprite *data;
+
+			if (!config_eat_token(&cfg, &asset)) {
+				config_print_error(&cfg, "Expected an asset to load after 'load'.");
+				continue;
+			}
+
+			while (config_eat_token(&cfg, &arg)) {
+				if (string_equals(arg, STR("rotate"))) {
+					uint64_t ammount;
+					if (!config_eat_token_uint(&cfg, &ammount) || ammount % 90 != 0) {
+						config_print_error(&cfg, "Expected the number of degrees to rotate sprite.");
+						continue;
+					}
+					rotate = ammount % 360;
+				} else if (string_equals(arg, STR("flip"))) {
+					if (!config_eat_token(&cfg, &arg)) {
+						config_print_error(&cfg, "Expected an axis to flip on, either 'horizontally' "
+										   "or 'vertically'.");
+					}
+
+					if (string_equals(arg, STR("horizontally"))) {
+						flip_horizontally = true;
+					} else if (string_equals(arg, STR("vertically"))) {
+						flip_vertically = true;
+					} else {
+						config_print_error(&cfg, "Expected an axis to flip on, either 'horizontally' "
+										   "or 'vertically'.");
+					}
+				}
+			}
+
+			if (!load_sprite_data(ctx, &data, width, height, asset)) {
+				continue;
+			}
+
+			imat2 transform = imat2_identity();
+
+			if (flip_horizontally) {
+				transform = imat2_multiply(transform, imat2_flipx());
+			}
+
+			if (flip_vertically) {
+				transform = imat2_multiply(transform, imat2_flipy());
+			}
+
+			if (rotate != 0) {
+				transform = imat2_multiply(transform, imat2_rotate(rotate));
+			}
+
+			ivec2 offset = {};
+			ivec2 size = ivec2_from(width, height);
+			ivec2 max_pos;
+
+			max_pos = imat2_multiply_ivec2(transform, size);
+			if (max_pos.x < 0) {
+				offset.x = (int)width - 1;
+			}
+			if (max_pos.y < 0) {
+				offset.y = (int)height - 1;
+			}
+
+			for (int y = 0; y < height; y++) {
+				for (int x = 0; x < width; x++) {
+					ivec2 pos = ivec2_from(x, y);
+					ivec2 new;
+
+					new = imat2_multiply_ivec2(transform, pos);
+					new = ivec2_add(new, offset);
+
+					for (int c = 0; c < 3; c++) {
+						sprite_out->data[new.y][new.x][c] = data->sprite.data[y][x][c];
+					}
+				}
+			}
+
+			/* for (int y = -offset_y; y < offset_y; y++) { */
+			/* 	for (int x = -offset_x; x < offset_x; x++) { */
+			/* 		int old_x, old_y; */
+			/* 		int new_x, new_y; */
+
+			/* 		new_x = transform[0][0] * x + transform[0][1] * y; */
+			/* 		new_y = transform[1][0] * x + transform[1][1] * y; */
+
+			/* 		old_x = x + offset_x; */
+			/* 		old_y = y + offset_y; */
+
+			/* 		new_x += offset_x; */
+			/* 		new_y += offset_y; */
+
+			/* 		for (int c = 0; c < 3; c++) { */
+			/* 			sprite_out->data[new_y][new_x][c] = data->sprite.data[old_y][old_x][c]; */
+			/* 		} */
+			/* 	} */
+			/* } */
+
+			free_sprite(data);
+
 		} else if (string_equals(token, STR("data"))) {
 			if (!size_specified) {
 				config_print_error(&cfg, "Size must be specified before sprite data is allowed.");
