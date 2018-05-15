@@ -34,6 +34,31 @@ bool load_chunk(struct chunk *out, struct texture_map *tex_map,
 	return load_chunk_from_file(out, tex_map, filename);
 }
 
+bool load_chunk_layer(struct chunk *out, struct texture_map *tex_map,
+				int64_t x, int64_t y, int64_t z, struct string layer) {
+	struct string filename;
+	char buffer[256 + layer.length];
+	int ret;
+
+	filename.data = (uint8_t *)buffer;
+
+	ret = snprintf(buffer, sizeof(buffer),
+				   "assets/world/%li.%li.%li.%.*s.chunk", x, y, z, LIT(layer));
+
+	if (ret < 0) {
+		perror("snprintf");
+		return false;
+	}
+
+	filename.length = ret;
+
+	out->x = x;
+	out->y = y;
+	out->z = z;
+
+	return load_chunk_from_file(out, tex_map, filename);
+}
+
 static bool load_chunk_from_file(struct chunk *out,
 								 struct texture_map *tex_map,
 								 struct string filename) {

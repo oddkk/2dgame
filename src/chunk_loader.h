@@ -8,5 +8,6 @@
 struct texture_map;
 
 bool load_chunk(struct chunk *out, struct texture_map *, int64_t x, int64_t y, int64_t z);
+bool load_chunk_layer(struct chunk *out, struct texture_map *, int64_t x, int64_t y, int64_t z, struct string layer);
 
 #endif
