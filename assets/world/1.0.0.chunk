@@ -1,0 +1,44 @@
+version 0.1
+size 16 9
+
+tile x sprites/grass
+tile 1 sprites/roof_left_corner
+tile 2 sprites/roof_right_corner
+tile l sprites/roof_left
+tile r sprites/roof_right
+tile - sprites/roof_gutter
+tile = sprites/roof_back
+tile 3 sprites/roof_back_left_corner
+tile 4 sprites/roof_back_right_corner
+tile ^ sprites/roof_top
+tile | sprites/wall
+tile ~ sprites/wall_left
+tile @ sprites/wall_right
+tile . sprites/ground
+tile d sprites/door
+tile w sprites/window
+tile _
+
+layer 0
+data
+_____xx_________
+___3========4_xx
+xxxl^^^^^^^^r_xx
+_xxl^^^^^^^^r___
+___1--------2x__
+___~|w|d||w|@x__
+________________
+xx____xxxxxx____
+________xxxx____
+
+layer 1
+data
+________________
+___||||||||||___
+___|........|___
+___|........|___
+___|........|___
+___||||_|||||___
+________________
+________________
+________________

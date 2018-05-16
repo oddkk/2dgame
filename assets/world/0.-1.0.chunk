@@ -2,23 +2,23 @@ version 0.1
 size 16 9
 
 tile x sprites/grass
-tile 1 sprites/roof_left_corner
-tile 2 sprites/roof_right_corner
-tile l sprites/roof_left
-tile r sprites/roof_right
-tile - sprites/roof_gutter
-tile = sprites/roof_back
-tile 3 sprites/roof_back_left_corner
-tile 4 sprites/roof_back_right_corner
-tile ^ sprites/roof_top
-tile | sprites/wall
-tile ~ sprites/wall_left
-tile @ sprites/wall_right
+tile 1 sprites/roof_left_corner       solid
+tile 2 sprites/roof_right_corner      solid
+tile l sprites/roof_left              solid
+tile r sprites/roof_right             solid
+tile - sprites/roof_gutter            solid
+tile = sprites/roof_back              solid
+tile 3 sprites/roof_back_left_corner  solid
+tile 4 sprites/roof_back_right_corner solid
+tile ^ sprites/roof_top               solid
+tile | sprites/wall                   solid
+tile ~ sprites/wall_left              solid
+tile @ sprites/wall_right             solid
 tile . sprites/ground
-tile d sprites/door
+tile d sprites/door                   solid
 tile o sprites/door_open
-tile w sprites/window
-tile _
+tile w sprites/window                 solid
+tile _ none
 
 data
 _____xx_________

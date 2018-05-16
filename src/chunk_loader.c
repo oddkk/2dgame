@@ -52,6 +52,7 @@ static bool load_chunk_from_file(struct chunk *out,
 	struct config_file cfg = {};
 	struct {
 		tex_id tex;
+		bool solid;
 		bool set;
 	} tile_palette[255] = {};
 	bool version_specified = false;
@@ -137,10 +138,25 @@ static bool load_chunk_from_file(struct chunk *out,
 			tile_palette[ident.data[0]].set = true;
 
 			if (!config_eat_token(&cfg, &name)) {
+				config_print_error(&cfg, "Expected sprite name or 'none' for tile '%.*s'.",
+								   LIT(ident));
 				continue;
 			}
 
-			tile_palette[ident.data[0]].tex = load_sprite(tex_map, name);
+			while (config_eat_token(&cfg, &token)) {
+				if (string_equals(token, STR("solid"))) {
+					tile_palette[ident.data[0]].solid = true;
+				} else {
+					config_print_error(&cfg, "Unexpected flag '%.*s' for tile '%.*s'.",
+									   LIT(token), LIT(ident));
+					continue;
+				}
+			}
+
+			if (!string_equals(name, STR("none"))) {
+				tile_palette[ident.data[0]].tex = load_sprite(tex_map, name);
+			}
+
 		} else if (string_equals(token, STR("layer"))) {
 			if (!config_eat_token_uint(&cfg, &layer)) {
 				config_print_error(&cfg, "Expected layer ID.");
@@ -175,6 +191,7 @@ static bool load_chunk_from_file(struct chunk *out,
 					// TODO: Implement support for multiple layers.
 					if (layer == 0) {
 						out->tilemap[row][col].tex_id = tile_palette[palette_entry].tex;
+						out->solidmap[row][col] = tile_palette[palette_entry].solid;
 					}
 				}
 			}

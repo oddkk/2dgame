@@ -25,6 +25,7 @@ struct chunk {
 	int32_t x, y, z;
 
 	struct tile tilemap[CHUNK_HEIGHT][CHUNK_WIDTH];
+	bool solidmap[CHUNK_HEIGHT][CHUNK_WIDTH];
 };
 
 struct world {
